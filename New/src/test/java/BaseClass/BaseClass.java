@@ -12,7 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -31,6 +33,7 @@ import org.testng.annotations.DataProvider;
 
 import com.relevantcodes.extentreports.ExtentReports;
 import com.relevantcodes.extentreports.ExtentTest;
+import com.relevantcodes.extentreports.LogStatus;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -132,13 +135,13 @@ public class BaseClass
     private static final String USER = "SureAdmin";
     private  static final String PASSWORD = "ndml@1234";
 	
-	public static void DBConnection(String query, String customerID) throws SQLException
+	public static void DBConnection(String bankRefCode) throws SQLException
 	{
-	   String query="Select spt_txn_id,spt_transaction_status,spt_surepay_mid,spt_customer_id from txn_sp_payment_transaction where spt_customer_id=?";
+	   String query="Select spt_txn_id,spt_transaction_status,spt_surepay_mid,spt_bank_ref_code from txn_sp_payment_transaction where spt_bank_ref_code=?";
 	   	
 	       Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
 	             PreparedStatement stmt = conn.prepareStatement(query);
-	             stmt.setString(1,customerID);
+	             stmt.setString(1,bankRefCode);
 	             ResultSet rs = stmt.executeQuery();
 	             
 	           while(rs.next())
@@ -146,14 +149,71 @@ public class BaseClass
 	        	   String txn_id=rs.getString("spt_txn_id");
 	        	   String txn_status=rs.getString("spt_transaction_status");
 	        	   String surepay_mid=rs.getString("spt_surepay_mid");
-	        	   String customer_id=rs.getString("spt_customer_id");
+	        	   String bank_ref_code=rs.getString("spt_bank_ref_code");
 
 	        	   System.out.println(txn_id);
 	        	   System.out.println(txn_status);
 	        	   System.out.println(surepay_mid);
-	        	   System.out.println(customer_id);
-
+	        	   System.out.println(bank_ref_code);
 	           }
-	         
 	}
+	
+	public static void TransactionMaster(String table_name,String txn_id, String transaction_status, String surepay_mid, String bankRefCode, String whereCols, String whereValue) throws SQLException
+	{
+	   String query="Select "+txn_id+","+transaction_status+","+surepay_mid+","+bankRefCode+" from "+table_name+" where "+whereCols+" =?";
+	   	
+	   //String query="Select spt_txn_id,spt_transaction_status,spt_surepay_mid,spt_bank_ref_code from txn_sp_payment_transaction where spt_bank_ref_code=?";
+
+	       Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+	             PreparedStatement stmt = conn.prepareStatement(query);
+	             stmt.setString(1,whereValue);
+	             ResultSet rs = stmt.executeQuery();
+	             
+	           while(rs.next())
+	           {
+	        	   String txnId=rs.getString("spt_txn_id");
+	        	   String txn_status=rs.getString("spt_transaction_status");
+	        	   String surepayMid=rs.getString("spt_surepay_mid");
+	        	   String bankrefcode=rs.getString("spt_bank_ref_code");
+
+	        	   System.out.println(txnId);
+	        	   System.out.println(txn_status);
+	        	   System.out.println(surepayMid);
+	        	   System.out.println(bankrefcode);
+	           }
+	}
+	
+	public static List<String> fetchTableAttributes(String col1, String col2,String col3, String col4, String col5)
+	{
+		List<String> columns=Arrays.asList(col1,col2,col3,col4,col5);
+		return columns;
+	}
+	
+	public static void fetchQueryData(String tableName, List<String> colNames, String whereColName, String whereValue) throws SQLException
+	{
+		String colsJoined=String.join(",", colNames);
+		String query="Select "+colsJoined+" from "+tableName+" Where "+whereColName+"= ?";
+		try
+		{
+		Connection con=DriverManager.getConnection(URL,USER,PASSWORD);
+		PreparedStatement state=con.prepareStatement(query);
+		state.setString(1, whereValue);
+		ResultSet rs=state.executeQuery();
+		while(rs.next())
+		{
+			for(String col:colNames)
+			{
+				String attributeName=rs.getString(col);
+				System.out.println(col+" -> "+attributeName);
+				logger.log(LogStatus.PASS, col+" -> "+attributeName);
+			}
+		}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
 }

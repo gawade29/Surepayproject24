@@ -2,6 +2,7 @@ package Surepay_TestPage_Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.testng.annotations.Test;
 
@@ -34,7 +35,12 @@ public class Surepay_TestPage_Test extends BaseClass
 		Thread.sleep(9000);
 		SurepayResPL.getTransactionDetails();
 		Thread.sleep(9000);
-		//DBConnection(customerID);
+		//DBConnection(SurepayResPL.getTransactionDetails()); //Way -1 
+		//TransactionMaster("txn_sp_payment_transaction", "spt_txn_id", "spt_transaction_status", "spt_surepay_mid", "spt_bank_ref_code", "spt_bank_ref_code",SurepayResPL.getTransactionDetails()); //Way-2
+
+		List<String> columns=fetchTableAttributes("spt_txn_id","spt_transaction_status", "spt_surepay_mid", "spt_bank_ref_code", "spt_merchant_order_id");
+		fetchQueryData("txn_sp_payment_transaction", columns, "spt_bank_ref_code", Surepay_ResponsePage_Action.getTransactionDetails());//Way - 3
+		
 		logger.log(LogStatus.PASS, logger.addScreenCapture(screenshot(dr, "TC_01")));
 	}
 }

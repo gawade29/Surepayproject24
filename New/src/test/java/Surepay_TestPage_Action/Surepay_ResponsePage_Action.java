@@ -23,13 +23,14 @@ public class Surepay_ResponsePage_Action
 	}
 	
 	
-	public static void getTransactionDetails()
+	public static String getTransactionDetails()
 	{
+		String bankTxnNO = null;
 		try
 		{
 		String mechantID=SurepayRPL.getMerchId().getText();
 		String serviceID=SurepayRPL.getMerchServiceId().getText();
-		String bankTxnNO=SurepayRPL.getBankTransactionNo().getText();
+		bankTxnNO=SurepayRPL.getBankTransactionNo().getText();
 		String orderID=SurepayRPL.getMerchantOrderID().getText();
 		logger.log(LogStatus.PASS,"Transaction details are--> merchantID:"+mechantID+", "+ "ServiceID:"+serviceID+ ", " +"BankTransactionNo:"+bankTxnNO+", "+"OrderID:"+orderID);
 		}
@@ -38,5 +39,6 @@ public class Surepay_ResponsePage_Action
 			logger.log(LogStatus.FAIL,"Some Exception occured at response page");
 
 		}
+		return bankTxnNO;
 	}
 }
